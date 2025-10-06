@@ -1,3 +1,7 @@
+const express = require('express');
+const app = express();
+app.use(express.json());
+
 const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 
 const client = new Client({
@@ -56,6 +60,46 @@ client.once('ready', async () => {
       }).catch(() => {});
     }
   };
+});
+
+const GIT_NOTIFY_SECRET = process.env.GIT_NOTIFY_SECRET;
+const PUSH_CHANNEL_ID   = process.env.PUSH_CHANNEL_ID;
+
+app.post('/git-notify', async (req, res) => {
+  try {
+    const auth = req.header('Authorization') || '';
+    if (auth !== `Bearer ${GIT_NOTIFY_SECRET}`) {
+      return res.status(401).send('Unauthorized');
+    }
+
+    const { repo = 'inconnu', branch = '???', pusher = '???', commits = [] } = req.body;
+
+    const ch = await client.channels.fetch(PUSH_CHANNEL_ID);
+    if (!ch || !ch.isTextBased()) {
+      console.error('Salon PUSH introuvable ou non textuel:', PUSH_CHANNEL_ID);
+      return res.status(500).json({ ok: false, error: 'bad channel' });
+    }
+
+    let lines = [`🚀 Push sur **${repo}** \`${branch}\` par **${pusher}**:`];
+    for (const c of commits.slice(0, 10)) {
+      const sha = (c.sha || '').substring(0, 7);
+      const msg = (c.message || '').split('\n')[0];
+      const author = c.author || 'n/a';
+      lines.push(`• \`${sha}\` — ${msg} (${author})`);
+    }
+    if (commits.length > 10) lines.push(`… et ${commits.length - 10} commits de plus.`);
+
+    await ch.send(lines.join('\n'));
+    return res.json({ ok: true });
+  } catch (e) {
+    console.error('Erreur git-notify:', e);
+    return res.status(500).json({ ok: false });
+  }
+});
+
+const PORT = process.env.GIT_NOTIFY_PORT || 5055;
+app.listen(PORT, '127.0.0.1', () => {
+  console.log(`git-notify écoute sur 127.0.0.1:${PORT}`);
 });
 
 client.on('guildMemberAdd', async (member) => {
