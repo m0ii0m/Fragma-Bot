@@ -83,23 +83,11 @@ app.post('/git-notify', async (req, res) => {
     }
 
     let lines = [`🚀 Push sur \`${branch}\` 🚀`];
-
-    const escapeBackticks = s => (s || '').replace(/`/g, '`' + '\u200B');
-
     for (const c of commits.slice(0, 10)) {
-      const rawMsg = (c.message || '').split('\n')[0];
+      //const sha = (c.sha || '').substring(0, 7);
+      const msg = (c.message || '').split('\n')[0];
       const author = c.author || 'n/a';
-
-      const parts = rawMsg.split(/\s*-\s*/).map(p => escapeBackticks(p.trim())).filter(p => p.length > 0);
-
-      if (parts.length <= 1) {
-        lines.push(`• ${author} — \`${escapeBackticks(rawMsg)}\``);
-      } else {
-        lines.push(`• ${author} — \`${parts[0]}\``);
-        for (let i = 1; i < parts.length; i++) {
-          lines.push(`     └ ${parts[i]}`);
-        }
-      }
+      lines.push(`• ${author} — \`${msg}\``);
     }
     if (commits.length > 10) lines.push(`… et ${commits.length - 10} commits de plus.`);
     lines.push(`@everyone`);
