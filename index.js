@@ -82,7 +82,7 @@ app.post('/git-notify', async (req, res) => {
       return res.status(500).json({ ok: false, error: 'bad channel' });
     }
 
-    let lines = [`🚀 Push sur **${repo}** \`${branch}\` par **${pusher}**:`];
+    let lines = [`🚀 Push sur \`${branch}\` 🚀`];
     for (const c of commits.slice(0, 10)) {
       const sha = (c.sha || '').substring(0, 7);
       const msg = (c.message || '').split('\n')[0];
@@ -90,6 +90,7 @@ app.post('/git-notify', async (req, res) => {
       lines.push(`• \`${sha}\` — ${msg} (${author})`);
     }
     if (commits.length > 10) lines.push(`… et ${commits.length - 10} commits de plus.`);
+    lines.push(`@everyone`);
 
     await ch.send(lines.join('\n'));
     return res.json({ ok: true });
