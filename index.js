@@ -128,6 +128,9 @@ client.on('messageCreate', async (message) => {
   if (message.content.toLowerCase() === 'ping') {
     await message.reply('pong');
   }
+  if (message.content.toLowerCase() === 'pong') {
+    await message.reply('ping');
+  }
 });
 
 client.login(process.env.BOT_TOKEN);
