@@ -15,9 +15,9 @@ jobs:
       - name: Install dependencies
         run: npm install --omit=dev
 
-      - name: Deploy to /opt/fragma-bot
+      - name: Deploy to /opt/discord/fragma-bot
         run: |
-          sudo rsync -avz --delete --exclude '.git' --exclude '.env' ./ /opt/fragma-bot/
+          sudo rsync -avz --delete --exclude '.git' --exclude '.env' ./ /opt/discord/fragma-bot/
 
       - name: Restart Fragma Bot Service
         run: sudo systemctl restart fragma-bot.service
