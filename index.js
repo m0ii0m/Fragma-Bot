@@ -10,6 +10,8 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
   ]
 });
 
@@ -43,7 +45,7 @@ client.once('ready', async () => {
             .setDescription('```' + msg + '```')
             .setTimestamp()
         ]
-      }).catch(() => {});
+      }).catch(() => { });
     }
   };
 
@@ -59,13 +61,13 @@ client.once('ready', async () => {
             .setDescription('```' + msg + '```')
             .setTimestamp()
         ]
-      }).catch(() => {});
+      }).catch(() => { });
     }
   };
 });
 
 const GIT_NOTIFY_SECRET = process.env.GIT_NOTIFY_SECRET;
-const PUSH_CHANNEL_ID   = process.env.PUSH_CHANNEL_ID;
+const PUSH_CHANNEL_ID = process.env.PUSH_CHANNEL_ID;
 
 app.post('/git-notify', async (req, res) => {
   try {
@@ -118,6 +120,13 @@ client.on('guildMemberAdd', async (member) => {
     console.log(`Rôle ${role.name} attribué à ${member.user.tag}`);
   } catch (err) {
     console.error('Erreur lors de l’attribution du rôle :', err);
+  }
+});
+
+client.on('messageCreate', async (message) => {
+  if (message.author.bot) return;
+  if (message.content.toLowerCase() === 'ping') {
+    await message.reply('pong');
   }
 });
 
